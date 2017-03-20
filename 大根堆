@@ -1,0 +1,28 @@
+大根堆
+//调整以index为根的子树  
+//n：堆中元素个数  
+int MaxHeap(int a[],int index,int n){  
+    int LargestIndex = index;  
+    //左子节点  
+    int LeftIndex = 2*index;  
+    //右子节点  
+    int RightIndex = 2*index+1;  
+    if(LeftIndex <= n && a[LeftIndex] > a[LargestIndex]){  
+        LargestIndex = LeftIndex;  
+    }  
+    if(RightIndex <= n && a[RightIndex] > a[LargestIndex]){  
+        LargestIndex = RightIndex;  
+    }  
+    //如果a[index]是最大的，则以index为根的子树已是最大堆否则index的子节点有最大元素  
+    //则交换a[index],a[LargetIndex],从而使index及子女满足堆性质  
+    int temp;  
+    if(LargestIndex != index){  
+        //交换a[index],a[LargetIndex]  
+        temp = a[index];  
+        a[index] = a[LargestIndex];  
+        a[LargestIndex] = temp;  
+        //重新调整以LargestIndex为根的子树  
+        MaxHeap(a,LargestIndex,n);  
+    }  
+    return 0;  
+}  
