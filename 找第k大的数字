@@ -1,4 +1,4 @@
-我们可以继续对上面的算法进行优化，我们只是从这些无序的数中选出最大的K个数，并不需要前K个数据有序，也不需要后N-K个数据有序。
+﻿我们可以继续对上面的算法进行优化，我们只是从这些无序的数中选出最大的K个数，并不需要前K个数据有序，也不需要后N-K个数据有序。
 怎样才能避免做后N-K个数据有序呢？
 回忆一下快速排序，快排中的每一步，都是将待排数据分做两组，其中一组的数据的任何一个数都比另一组中的任何一个大，然后再对两组分别做类似的操
 作，然后继续下去……在本问题中，假设 N 个数存储在数组 S 中，我们从数组 S 中随机找出一个元素 X，把数组分为两部分 Sa 和 Sb。
@@ -69,5 +69,80 @@ int main(){  
         printf("%d ",a[i]);  
     }  
     printf("\n");  
+    return 0;  
+}  
+用容量为K的最小堆来存储最大的K个数。最小堆的堆顶元素就是最大K个数中的最小的一个。每次扫描一个数据X，如果X比堆顶元素Y小，则不需要改变原来的堆，因为这个元素比最大的K个数要小。如果X比堆顶元素大，那么用X替换堆顶元素Y，在替换之后，X可能破坏了最小堆的结构，需要调整堆来维持堆的性质。调整过程时间复杂度为O(logK)。
+当数据量很大时（100亿？这时候数据已经不能全部装入内存，所以要求尽可能少的遍历数组）可以采用这种方法。
+
+[cpp] view plaincopy 
+
+
+#include<stdio.h>  
+#include<stdlib.h>  
+  
+//调整以index为根的子树  
+//k：堆中元素个数  
+int MinHeap(int a[],int index,int k){  
+    int MinIndex = index;  
+    //左子节点  
+    int LeftIndex = 2*index;  
+    //右子节点  
+    int RightIndex = 2*index+1;  
+    if(LeftIndex <= k && a[LeftIndex] < a[MinIndex]){  
+        MinIndex = LeftIndex;  
+    }  
+    if(RightIndex <= k && a[RightIndex] < a[MinIndex]){  
+        MinIndex = RightIndex;  
+    }  
+    //如果a[index]是最小的，则以index为根的子树已是最小堆否则index的子节点有最小元素  
+    //则交换a[index],a[MinIndex],从而使index及子女满足堆性质  
+    int temp;  
+    if(MinIndex != index){  
+        //交换a[index],a[MinIndex]  
+        temp = a[index];  
+        a[index] = a[MinIndex];  
+        a[MinIndex] = temp;  
+        //重新调整以MinIndex为根的子树  
+        MinHeap(a,MinIndex,k);  
+    }  
+    return 0;  
+}  
+  
+  
+//建堆：将一个数组a[1-k]变成一个最小堆  
+int BuildMinHeap(int a[],int k){  
+    int i;  
+    //用容量为k的最小堆来存储最大的k个数  
+    for(i = k;i >= 1;i--){  
+        //调整以i为根节点的树使之成为最小堆  
+        MinHeap(a,i,k);  
+    }  
+    return 0;  
+}  
+  
+int main(){  
+    int n = 6;  
+    int k = 3;  
+    //a[0]不用，堆的根结点是从1开始的  
+    int a[] = {0,3,17,8,27,7,20};  
+    //BulidMaxHeap将输入数组构造一个最小堆  
+    BuildMinHeap(a,k);  
+    //数组中最小元素在根a[1]  
+    for(int i = n;i > k;i--){  
+        //如果X比堆顶元素Y小，则不需要改变原来的堆  
+        //如果X比堆顶元素Y大，那么用X替换堆顶元素Y，在替换之后，X可能破坏了最小堆的结构，需要调整堆来维持堆的性质  
+        int temp;  
+        if(a[1] < a[i]){  
+            //交换  
+            temp = a[i];  
+            a[i] = a[1];  
+            a[1] = temp;  
+            //重新调整，保持最小堆的性质  
+            MinHeap(a,1,k);  
+        }  
+    }  
+    for(i = 1;i <= k;i++){  
+        printf("%d ",a[i]);  
+    }  
     return 0;  
 }  
